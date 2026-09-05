@@ -1,5 +1,5 @@
 appname               = xiaozhi-esp32-server
-version               = 0.9.6.2
+version               = 0.9.6.3
 display_name          = 智控台
 desc                  = 官方 xiaozhi-esp32-server 智控台与全模块后端（Server + Web + MySQL + Redis）。为 ESP32 小智设备提供 WebSocket 语音后端、OTA、MCP 接入点与智控台管理，当前对应上游 v0.9.6。
 platform              = all
@@ -8,7 +8,7 @@ maintainer            = howecheung
 maintainer_url        = https://github.com/howecheung
 distributor           = howecheung
 distributor_url       = https://github.com/howecheung/xiaozhi-esp32-server-fpk
-changelog             = 应用名改为智控台并使用官方图标；全模块部署官方 server_0.9.6 / web_0.9.6，固定 MySQL 8.0 与 Redis 8.0-alpine，保留 var 数据目录实现升级渠道
+changelog             = 更换官方图标文件名以强制刷新 fnOS 桌面图标缓存；应用名保持智控台，全模块部署官方 server_0.9.6 / web_0.9.6，保留 var 数据目录实现升级渠道
 os_min_version        = 1.1.3100
 ctl_stop              = true
 service_port          = 8002
