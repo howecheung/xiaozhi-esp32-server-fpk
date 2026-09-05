@@ -96,9 +96,9 @@ jobs:
 
           NOTES="## ${TAG} · 自动跟随上游 xiaozhi-esp32-server v${UP}
 
-- 全自动更新：上游 Release 检测 → 镜像 tag / manifest / README 同步 → 发布 Release
-- FPK 由 build-fpk 工作流自动构建并附加到本 Release
-- fnOS 安装同名 fpk 即走升级，var 数据与配置保留"
+          - 全自动更新：上游 Release 检测 → 镜像 tag / manifest / README 同步 → 发布 Release
+          - FPK 由 build-fpk 工作流自动构建并附加到本 Release
+          - fnOS 安装同名 fpk 即走升级，var 数据与配置保留"
           gh release create "${TAG}" \
             --repo "${GITHUB_REPOSITORY}" \
             --title "小智后端服务 · fnOS FPK ${TAG}" \
