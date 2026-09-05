@@ -23,10 +23,15 @@ services:
       - "8003:8003"
     environment:
       - TZ=Asia/Shanghai
+    entrypoint:
+      - /bin/sh
+      - /opt/xiaozhi-esp32-server/fpk-helper/entry.sh
     volumes:
       - "${TRIM_PKGVAR}/data:/opt/xiaozhi-esp32-server/data"
-      # 可选本地模型目录（例如 SenseVoiceSmall/model.pt），默认留空使用云 API
-      - "${TRIM_PKGVAR}/models:/opt/xiaozhi-esp32-server/models"
+      # 只挂载 model.pt 单文件，避免覆盖镜像内置的 Silero VAD 等模型
+      - "${TRIM_PKGVAR}/models/SenseVoiceSmall/model.pt:/opt/xiaozhi-esp32-server/models/SenseVoiceSmall/model.pt"
+      # FPK 首次启动辅助脚本（下载本地 ASR 模型后 exec 官方 app.py）
+      - "${TRIM_APPDEST}/docker/server-helper:/opt/xiaozhi-esp32-server/fpk-helper:ro"
     mem_limit: 2g
     logging: *default-logging
 

@@ -7,6 +7,11 @@ mkdir -p "$TRIM_PKGVAR/data" \
          "$TRIM_PKGVAR/models/SenseVoiceSmall" \
          "$TRIM_PKGVAR/uploadfile"
 
+# 升级时若模型缺失/占位，同样由容器首次启动自动下载
+if [ ! -s "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt" ]; then
+  touch "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt"
+fi
+
 # 仅当 var 中没有 .config.yaml 时才补初始模板，避免覆盖用户配置
 if [ ! -f "$TRIM_PKGVAR/data/.config.yaml" ]; then
   cp -f "$TRIM_APPDEST/docker/data/.config.yaml" \
