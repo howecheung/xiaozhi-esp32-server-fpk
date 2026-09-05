@@ -1,7 +1,7 @@
 {
   ".url": {
     "xiaozhi-esp32-server.main": {
-      "title": "小智后端服务 智控台",
+      "title": "智控台",
       "icon": "images/icon_{0}.png",
       "type": "url",
       "protocol": "http",

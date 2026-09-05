@@ -1,10 +1,10 @@
-# xiaozhi-esp32-server fnOS FPK（小智后端服务）
+# 智控台 · xiaozhi-esp32-server fnOS FPK
 
 把官方 [xinnan-tech/xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server)
 以**全模块**方式封装成飞牛 fnOS `.fpk` 应用，用于让 ESP32 小智设备连接自建后端。
 
-应用包版本号使用 `<上游版本>.<FPK修订>` 格式（例如上游 `v0.9.6` → 包版本
-`0.9.6.1`），镜像默认使用国内镜像站
+应用包版本号使用 `<上游版本>.<FPK修订>` 格式（当前上游 `v0.9.6` → 包版本
+`0.9.6.2`），镜像默认使用国内镜像站
 `ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server`。
 
 仓库内的 `auto-upstream` 工作流会定时检测上游新标签：发现新版后自动更新镜像
@@ -34,9 +34,9 @@ tag、manifest 与 README，提交并发布同名 Release，再由 `build-fpk` �
 
 ## 安装
 
-1. 飞牛桌面 → 应用中心 → 手动安装，选择 `xiaozhi-esp32-server-0.9.6.1.fpk`；
+1. 飞牛桌面 → 应用中心 → 手动安装，选择 Release 里的 `xiaozhi-esp32-server-<版本>.fpk`；
 2. 首次启动需要从 `ghcr.nju.edu.cn` 与 Docker Hub 拉取镜像；
-3. 点击桌面“小智后端服务 智控台”，注册第一个管理员账号。
+3. 点击桌面“智控台”，注册第一个管理员账号。
 
 ## 首次配置（重要，三件事）
 
