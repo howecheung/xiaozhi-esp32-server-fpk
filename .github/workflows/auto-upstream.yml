@@ -1,0 +1,105 @@
+name: Auto Update from Upstream
+
+on:
+  schedule:
+    # 每 6 小时检查一次上游 Release
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      upstream_release:
+        description: "Optional upstream release tag override, e.g. v0.9.6"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect latest upstream release
+        id: detect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_RELEASE: ${{ inputs.upstream_release }}
+        run: |
+          set -euo pipefail
+          if [ -n "${UPSTREAM_RELEASE}" ]; then
+            UP_TAG="${UPSTREAM_RELEASE}"
+          else
+            UP_TAG="$(gh api repos/xinnan-tech/xiaozhi-esp32-server/releases/latest --jq .tag_name)"
+          fi
+          UP="${UP_TAG#v}"
+          # 仅处理稳定版本，例如 0.10.0，忽略 0.10.0-beta
+          if ! [[ "${UP}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Skip non-stable upstream version: ${UP_TAG}"
+            echo "action=skip" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          CUR="$(sed -n 's/^version[[:space:]]*=[[:space:]]*\([0-9][0-9.]*\).*/\1/p' manifest)"
+          CUR_UP="${CUR%.*}"   # 0.9.6.1 -> 0.9.6
+          echo "upstream=${UP} current-upstream=${CUR_UP} current-package=${CUR}"
+          if [ "${UP}" = "${CUR_UP}" ]; then
+            echo "Already up to date with upstream ${UP}"
+            echo "action=skip" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          HIGHER="$(printf '%s\n%s\n' "${UP}" "${CUR_UP}" | sort -V | tail -n 1)"
+          if [ "${HIGHER}" != "${UP}" ]; then
+            echo "Local packaging is newer than upstream, skip"
+            echo "action=skip" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "action=update" >> "${GITHUB_OUTPUT}"
+          echo "upstream=${UP}" >> "${GITHUB_OUTPUT}"
+          echo "current_upstream=${CUR_UP}" >> "${GITHUB_OUTPUT}"
+          echo "package_version=${UP}.1" >> "${GITHUB_OUTPUT}"
+
+      - name: Bump images, manifest and README
+        if: steps.detect.outputs.action == 'update'
+        env:
+          UP: ${{ steps.detect.outputs.upstream }}
+          CUR_UP: ${{ steps.detect.outputs.current_upstream }}
+          PKG_VER: ${{ steps.detect.outputs.package_version }}
+        run: |
+          set -euo pipefail
+          sed -i \
+            -e "s/server_${CUR_UP}/server_${UP}/g" \
+            -e "s/web_${CUR_UP}/web_${UP}/g" \
+            app/docker/docker-compose.yaml README.md
+          sed -i "s/^version[[:space:]]*=[[:space:]]*.*/version               = ${PKG_VER}/" manifest
+          sed -i "s/^changelog[[:space:]]*=.*/changelog             = 自动跟随上游 v${UP}，更新 server\/web 镜像并保留升级数据渠道/" manifest
+          git diff --stat
+          git diff
+
+      - name: Commit, tag and create release
+        if: steps.detect.outputs.action == 'update'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UP: ${{ steps.detect.outputs.upstream }}
+          PKG_VER: ${{ steps.detect.outputs.package_version }}
+        run: |
+          set -euo pipefail
+          git config user.name "howecheung"
+          git config user.email "scantfly@gmail.com"
+          git add README.md app/docker/docker-compose.yaml manifest
+          git commit -m "chore: auto follow upstream v${UP} (fpk v${PKG_VER})"
+          git push origin main
+
+          TAG="v${PKG_VER}"
+          git tag -a "${TAG}" -m "xiaozhi-esp32-server fnOS FPK ${TAG}"
+          git push origin "${TAG}"
+
+          NOTES="## ${TAG} · 自动跟随上游 xiaozhi-esp32-server v${UP}
+
+- 全自动更新：上游 Release 检测 → 镜像 tag / manifest / README 同步 → 发布 Release
+- FPK 由 build-fpk 工作流自动构建并附加到本 Release
+- fnOS 安装同名 fpk 即走升级，var 数据与配置保留"
+          gh release create "${TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "小智后端服务 · fnOS FPK ${TAG}" \
+            --notes "${NOTES}"

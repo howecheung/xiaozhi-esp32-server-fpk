@@ -3,8 +3,13 @@
 把官方 [xinnan-tech/xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server)
 以**全模块**方式封装成飞牛 fnOS `.fpk` 应用，用于让 ESP32 小智设备连接自建后端。
 
-首个版本固定上游 `v0.9.6`（应用包版本 `0.9.6.1`），镜像默认使用国内镜像站
-`ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:server_0.9.6 / web_0.9.6`。
+应用包版本号使用 `<上游版本>.<FPK修订>` 格式（例如上游 `v0.9.6` → 包版本
+`0.9.6.1`），镜像默认使用国内镜像站
+`ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server`。
+
+仓库内的 `auto-upstream` 工作流会定时检测上游新标签：发现新版后自动更新镜像
+tag、manifest 与 README，提交并发布同名 Release，再由 `build-fpk` 工作流自动
+构建并附加 FPK。
 
 ## 包含的服务
 
@@ -71,7 +76,7 @@ OTA 接口：      http://你的NAS局域网IP:8002/xiaozhi/ota/
 .\build-fpk.ps1
 ```
 
-产物输出到 `dist\xiaozhi-esp32-server-0.9.6.1.fpk`，并自动在本目录生成同名
+产物输出到 `dist\xiaozhi-esp32-server-<版本>.fpk`，并自动在本目录生成同名
 带版本号文件。`fnpack` 可放入 PATH，或用 `FNPACK` 环境变量指定路径。
 
 > 如国内镜像站拉取失败，可将 compose 里所有
