@@ -10,6 +10,7 @@ mkdir -p "$TRIM_PKGVAR/data" \
 # 升级时若模型缺失/占位，同样由容器首次启动自动下载
 if [ ! -s "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt" ]; then
   touch "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt"
+  rm -f "$TRIM_PKGVAR/data/.sensevoice_model_ready"
 fi
 
 # 仅当 var 中没有 .config.yaml 时才补初始模板，避免覆盖用户配置

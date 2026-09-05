@@ -11,6 +11,7 @@ mkdir -p "$TRIM_PKGVAR/data" \
 # 占位 model.pt：容器首次启动会自动下载真实模型（约 900MB）
 if [ ! -s "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt" ]; then
   touch "$TRIM_PKGVAR/models/SenseVoiceSmall/model.pt"
+  rm -f "$TRIM_PKGVAR/data/.sensevoice_model_ready"
 fi
 
 # 首次安装写入智控台对接模板；升级时若已存在则原样保留

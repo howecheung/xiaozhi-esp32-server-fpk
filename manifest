@@ -1,5 +1,5 @@
 appname               = xiaozhi-esp32-server
-version               = 0.9.6.4
+version               = 0.9.6.5
 display_name          = 智控台
 desc                  = 官方 xiaozhi-esp32-server 智控台与全模块后端（Server + Web + MySQL + Redis）。为 ESP32 小智设备提供 WebSocket 语音后端、OTA、MCP 接入点与智控台管理，当前对应上游 v0.9.6。
 platform              = all
@@ -8,7 +8,7 @@ maintainer            = howecheung
 maintainer_url        = https://github.com/howecheung
 distributor           = howecheung
 distributor_url       = https://github.com/howecheung/xiaozhi-esp32-server-fpk
-changelog             = 修复 models 整目录挂载覆盖镜像内置 Silero VAD 模型导致的启动崩溃；本地 FunASR 模型不再随包挂载，ASR 默认改用智控台云端配置
+changelog             = 修复本地模型下载完成时 bind-mount 单文件无法 rename 覆盖（EBUSY）的问题，改为写入挂载文件并用完成标记防误判；本地 FunASR/SenseVoice 模型约 900MB 首次启动自动下载
 os_min_version        = 1.1.3100
 ctl_stop              = true
 service_port          = 8002

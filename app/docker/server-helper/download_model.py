@@ -6,6 +6,7 @@ this helper runs inside the server container before app.py and replaces it.
 """
 
 import os
+import shutil
 import sys
 import tempfile
 import urllib.request
@@ -17,6 +18,7 @@ SOURCES = [
     "https://hf-mirror.com/FunAudioLLM/SenseVoiceSmall/resolve/main/model.pt",
 ]
 BLOCK = 1024 * 1024  # 1MB
+READY_MARKER = "/opt/xiaozhi-esp32-server/data/.sensevoice_model_ready"
 
 
 def download(target, url):
@@ -40,7 +42,16 @@ def download(target, url):
                     print(f"  downloaded {downloaded / (1024 * 1024):.1f} MB", flush=True)
         if downloaded < 1024 * 1024:
             raise RuntimeError("downloaded file is unexpectedly small")
-        os.replace(tmp, target)
+        # target 是 Docker bind-mount 的单文件，不能 rename 覆盖（会 EBUSY），
+        # 改为先把内容完整写入挂载文件，再删除临时文件。
+        with open(target, "wb") as dst:
+            with open(tmp, "rb") as src:
+                shutil.copyfileobj(src, dst, length=BLOCK)
+            dst.flush()
+            os.fsync(dst.fileno())
+        os.unlink(tmp)
+        with open(READY_MARKER, "w", encoding="utf-8") as mh:
+            mh.write("ok\n")
     except Exception:
         try:
             os.unlink(tmp)
