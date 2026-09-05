@@ -55,9 +55,17 @@ jobs:
 
       - name: Build FPK
         run: |
+          BUILD_DIR="${RUNNER_TEMP}/package"
+          mkdir -p "${BUILD_DIR}" "${RUNNER_TEMP}/dist"
+          # 只复制打包工程，排除 .git、dist 与仓库里已提交的 fpk 成品
+          tar \
+            --exclude='./.git' \
+            --exclude='./dist' \
+            --exclude='xiaozhi-esp32-server-*.fpk' \
+            -C "${GITHUB_WORKSPACE}" -cf - . | tar -xf - -C "${BUILD_DIR}"
           mkdir -p "${RUNNER_TEMP}/dist"
           cd "${RUNNER_TEMP}/dist"
-          /tmp/fnpack build --directory "${GITHUB_WORKSPACE}"
+          /tmp/fnpack build --directory "${BUILD_DIR}"
           cp ./*.fpk "${GITHUB_WORKSPACE}/${{ steps.version.outputs.artifact }}"
 
       - name: Upload workflow artifact
