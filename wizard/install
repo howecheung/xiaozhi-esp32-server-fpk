@@ -1,0 +1,15 @@
+[
+  {
+    "stepTitle": "安装说明",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "小智后端服务为 ESP32 小智设备提供后端能力。首次启动会从 ghcr.nju.edu.cn 拉取官方镜像（server_0.9.6 / web_0.9.6）以及 MySQL、Redis 镜像，请确保 NAS 可以访问外网。"
+      },
+      {
+        "type": "tips",
+        "helpText": "安装完成后点击桌面“小智后端服务 智控台”注册第一个管理员；随后按仓库 README 的首次配置步骤填写 server.secret 后重启应用。"
+      }
+    ]
+  }
+]

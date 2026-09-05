@@ -1,0 +1,14 @@
+# 小智后端服务 FPK 初始配置（复制到 var/data/.config.yaml）
+# 首次使用：
+#  1. 打开智控台（桌面“小智后端服务 智控台”）并注册第一个管理员
+#  2. 进入「参数管理」，复制 server.secret 的参数值
+#  3. 将参数值填入下面 manager-api.secret
+#  4. 在飞牛应用中心重启本应用
+server:
+  ip: 0.0.0.0
+  port: 8000
+  http_port: 8003
+manager-api:
+  url: http://xiaozhi-esp32-server-web:8002/xiaozhi
+  secret: ""
+prompt_template: agent-base-prompt.txt

@@ -1,0 +1,29 @@
+#!/bin/bash
+set -u
+
+CONTAINER_NAME="xiaozhi-esp32-server-web"
+
+is_running() {
+  [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_NAME" 2>/dev/null)" = "true" ]
+}
+
+case "$1" in
+  start)
+    # Docker 应用启停由应用中心执行 compose 管理，这里无需额外动作
+    exit 0
+    ;;
+  stop)
+    # Docker 应用启停由应用中心执行 compose 管理，这里无需额外动作
+    exit 0
+    ;;
+  status)
+    if is_running; then
+      exit 0
+    fi
+    exit 3
+    ;;
+  *)
+    echo "Unknown command: $1" > "$TRIM_TEMP_LOGFILE"
+    exit 1
+    ;;
+esac

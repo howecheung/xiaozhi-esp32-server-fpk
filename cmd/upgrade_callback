@@ -1,0 +1,16 @@
+#!/bin/bash
+set -u
+
+mkdir -p "$TRIM_PKGVAR/data" \
+         "$TRIM_PKGVAR/mysql/data" \
+         "$TRIM_PKGVAR/redis" \
+         "$TRIM_PKGVAR/models/SenseVoiceSmall" \
+         "$TRIM_PKGVAR/uploadfile"
+
+# 仅当 var 中没有 .config.yaml 时才补初始模板，避免覆盖用户配置
+if [ ! -f "$TRIM_PKGVAR/data/.config.yaml" ]; then
+  cp -f "$TRIM_APPDEST/docker/data/.config.yaml" \
+        "$TRIM_PKGVAR/data/.config.yaml" 2>/dev/null || true
+fi
+
+exit 0

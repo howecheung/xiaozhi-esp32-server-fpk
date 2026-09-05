@@ -1,0 +1,94 @@
+# 小智后端服务（xiaozhi-esp32-server）全模块 FPK
+# 镜像仓库默认使用国内镜像站 ghcr.nju.edu.cn；如拉取失败可整体换成 ghcr.io
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  xiaozhi-esp32-server:
+    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:server_0.9.6
+    container_name: xiaozhi-esp32-server
+    restart: unless-stopped
+    depends_on:
+      xiaozhi-esp32-server-db:
+        condition: service_healthy
+      xiaozhi-esp32-server-redis:
+        condition: service_healthy
+    ports:
+      # WebSocket 语音后端（写入 ESP32 固件）
+      - "8000:8000"
+      # 简单 OTA / 视觉分析接口
+      - "8003:8003"
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - "${TRIM_PKGVAR}/data:/opt/xiaozhi-esp32-server/data"
+      # 可选本地模型目录（例如 SenseVoiceSmall/model.pt），默认留空使用云 API
+      - "${TRIM_PKGVAR}/models:/opt/xiaozhi-esp32-server/models"
+    mem_limit: 2g
+    logging: *default-logging
+
+  xiaozhi-esp32-server-web:
+    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:web_0.9.6
+    container_name: xiaozhi-esp32-server-web
+    restart: unless-stopped
+    depends_on:
+      xiaozhi-esp32-server-db:
+        condition: service_healthy
+      xiaozhi-esp32-server-redis:
+        condition: service_healthy
+    ports:
+      # 智控台（安装时由 fnOS 分配宿主机端口）
+      - "${TRIM_SERVICE_PORT}:8002"
+    environment:
+      - TZ=Asia/Shanghai
+      - SPRING_DATASOURCE_DRUID_URL=jdbc:mysql://xiaozhi-esp32-server-db:3306/xiaozhi_esp32_server?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&connectTimeout=30000&socketTimeout=30000&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
+      - SPRING_DATASOURCE_DRUID_USERNAME=root
+      - SPRING_DATASOURCE_DRUID_PASSWORD=123456
+      - SPRING_DATA_REDIS_HOST=xiaozhi-esp32-server-redis
+      - SPRING_DATA_REDIS_PASSWORD=
+      - SPRING_DATA_REDIS_PORT=6379
+    volumes:
+      - "${TRIM_PKGVAR}/uploadfile:/uploadfile"
+    mem_limit: 1536m
+    logging: *default-logging
+
+  xiaozhi-esp32-server-db:
+    image: mysql:8.0
+    container_name: xiaozhi-esp32-server-db
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=xiaozhi_esp32_server
+    volumes:
+      - "${TRIM_PKGVAR}/mysql/data:/var/lib/mysql"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    mem_limit: 1g
+    logging: *default-logging
+
+  xiaozhi-esp32-server-redis:
+    image: redis:8.0-alpine
+    container_name: xiaozhi-esp32-server-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
+    volumes:
+      - "${TRIM_PKGVAR}/redis:/data"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    mem_limit: 512m
+    logging: *default-logging

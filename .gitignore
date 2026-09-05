@@ -1,0 +1,12 @@
+# Python / build cache
+__pycache__/
+*.py[cod]
+dist/
+
+# Local env / editor
+.env
+.env.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

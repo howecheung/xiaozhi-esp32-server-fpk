@@ -1,0 +1,18 @@
+#!/bin/bash
+set -u
+
+# 创建 fnOS 持久数据目录
+mkdir -p "$TRIM_PKGVAR/data" \
+         "$TRIM_PKGVAR/mysql/data" \
+         "$TRIM_PKGVAR/redis" \
+         "$TRIM_PKGVAR/models/SenseVoiceSmall" \
+         "$TRIM_PKGVAR/uploadfile"
+
+# 首次安装写入智控台对接模板；升级时若已存在则原样保留
+if [ ! -f "$TRIM_PKGVAR/data/.config.yaml" ]; then
+  mkdir -p "$TRIM_PKGVAR/data"
+  cp -f "$TRIM_APPDEST/docker/data/.config.yaml" \
+        "$TRIM_PKGVAR/data/.config.yaml" 2>/dev/null || true
+fi
+
+exit 0

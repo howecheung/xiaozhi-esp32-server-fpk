@@ -1,0 +1,3 @@
+#!/bin/bash
+# 全模块配置在智控台内完成；如未来 fnOS 设置页收集字段，可在此写入 .config.yaml
+exit 0

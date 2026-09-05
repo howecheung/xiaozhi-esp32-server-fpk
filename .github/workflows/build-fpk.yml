@@ -1,0 +1,78 @@
+name: Build fnOS FPK
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to attach the FPK to, e.g. v0.9.6.1"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-fpk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download official fnpack (Linux amd64)
+        run: |
+          curl -fsSL -o /tmp/fnpack \
+            "https://static2.fnnas.com/fnpack/fnpack-1.2.3-linux-amd64"
+          chmod +x /tmp/fnpack
+          /tmp/fnpack --help
+
+      - name: Resolve tag and artifact name
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          MANUAL_TAG: ${{ inputs.release_tag }}
+        run: |
+          TAG="${RELEASE_TAG}"
+          if [ -z "${TAG}" ]; then TAG="${MANUAL_TAG}"; fi
+          if [ -z "${TAG}" ]; then TAG="dev"; fi
+          VER="${TAG#v}"
+          APP="$(sed -n 's/^appname[[:space:]]*=[[:space:]]*\([^[:space:]]*\).*/\1/p' manifest)"
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+          echo "artifact=${APP}-${VER}.fpk" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify manifest version matches tag
+        if: steps.version.outputs.tag != 'dev'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          EXPECTED="${TAG#v}"
+          MANIFEST_VER="$(sed -n 's/^version[[:space:]]*=[[:space:]]*\([0-9][0-9.]*\).*/\1/p' manifest)"
+          if [ "${MANIFEST_VER}" != "${EXPECTED}" ]; then
+            echo "manifest version '${MANIFEST_VER}' does not match tag '${TAG}'" >&2
+            exit 1
+          fi
+
+      - name: Build FPK
+        run: |
+          mkdir -p "${RUNNER_TEMP}/dist"
+          cd "${RUNNER_TEMP}/dist"
+          /tmp/fnpack build --directory "${GITHUB_WORKSPACE}"
+          cp ./*.fpk "${GITHUB_WORKSPACE}/${{ steps.version.outputs.artifact }}"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.artifact }}
+          path: ${{ steps.version.outputs.artifact }}
+          if-no-files-found: error
+
+      - name: Attach FPK to GitHub Release
+        if: github.event_name == 'release' || inputs.release_tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          ARTIFACT: ${{ steps.version.outputs.artifact }}
+        run: |
+          gh release upload "${TAG}" "${ARTIFACT}" \
+            --repo "${GITHUB_REPOSITORY}" --clobber
