@@ -8,7 +8,7 @@ x-logging: &default-logging
 
 services:
   xiaozhi-esp32-server:
-    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:server_0.9.7
+    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:server_0.9.8
     container_name: xiaozhi-esp32-server
     restart: unless-stopped
     depends_on:
@@ -36,7 +36,7 @@ services:
     logging: *default-logging
 
   xiaozhi-esp32-server-web:
-    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:web_0.9.7
+    image: ghcr.nju.edu.cn/xinnan-tech/xiaozhi-esp32-server:web_0.9.8
     container_name: xiaozhi-esp32-server-web
     restart: unless-stopped
     depends_on:

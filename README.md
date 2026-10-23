@@ -18,8 +18,8 @@ tag、manifest 与 README，提交并发布同名 Release，再由 `build-fpk` �
 
 | 容器 | 镜像 | 用途 | 端口 |
 | --- | --- | --- | --- |
-| xiaozhi-esp32-server | server_0.9.7 | WebSocket 语音后端 + 简单 OTA / 视觉接口 | 8000 / 8003（宿主机固定） |
-| xiaozhi-esp32-server-web | web_0.9.7 | 智控台（Java API + Nginx） | 8002（安装时 fnOS 分配宿主机端口） |
+| xiaozhi-esp32-server | server_0.9.8 | WebSocket 语音后端 + 简单 OTA / 视觉接口 | 8000 / 8003（宿主机固定） |
+| xiaozhi-esp32-server-web | web_0.9.8 | 智控台（Java API + Nginx） | 8002（安装时 fnOS 分配宿主机端口） |
 | xiaozhi-esp32-server-db | mysql:8.0 | 全模块数据库 | 仅内网 |
 | xiaozhi-esp32-server-redis | redis:8.0-alpine | 缓存 | 仅内网 |
 
